@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"goroutine-optimize/config"
 	"goroutine-optimize/logger"
 
 	"gorm.io/driver/postgres"
@@ -9,11 +10,11 @@ import (
 )
 
 func GetClientDb() *gorm.DB {
-	db_host := "localhost"
-	db_user := "postgres"
-	db_password := "dua_lima25"
-	db_dbname := "mini_project_test"
-	db_port := "5432"
+	db_host := config.DB_HOST
+	db_user := config.DB_USER
+	db_password := config.DB_PASSWORD
+	db_dbname := config.DB_NAME
+	db_port := config.DB_PORT
 
 	fmt.Println("Host", db_dbname)
 

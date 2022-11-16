@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"goroutine-optimize/errs"
 	"reflect"
+	"strconv"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type ResponseMessage struct {
@@ -21,8 +24,15 @@ func IsValid(data interface{}) *errs.AppErr {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
-		if field.Tag.Get("required") == "true" && reflect.ValueOf(data).Field(i).Interface() == "" {
+		if field.Tag.Get("required") != "" && field.Tag.Get("required") == "true" && reflect.ValueOf(data).Field(i).Interface() == "" {
 			return errs.NewValidationError(fmt.Sprintf("field %s cannot be empty", field.Name))
+		}
+
+		if field.Tag.Get("min") != "" {
+			minLength, _ := strconv.Atoi(field.Tag.Get("min"))
+			if int(len(reflect.ValueOf(data).Field(i).Interface().(string))) < minLength {
+				return errs.NewValidationError(fmt.Sprintf("field %s cannot less than %s", field.Name, strconv.Itoa(minLength)))
+			}
 		}
 
 		// lengthName := reflect.ValueOf(data).Field(i).Interface().(string) // .(string) di akhir digunakan untuk konversi tipe data pada tipe data interface kosong
@@ -37,4 +47,9 @@ func IsValid(data interface{}) *errs.AppErr {
 	}
 
 	return nil
+}
+
+func BcryptPassword(passwordSalt string) string {
+	newPassword, _ := bcrypt.GenerateFromPassword([]byte(passwordSalt), 8)
+	return string(newPassword)
 }
