@@ -38,7 +38,7 @@ func SanityCheck() {
 			logger.Fatal(fmt.Sprintf("environment variabel %s is not defined, application terminate", os.Getenv(key)))
 		}
 	}
-	SERVER_ADDRESS = os.Getenv("SERVER_ADDRES")
+	SERVER_ADDRESS = os.Getenv("SERVER_ADDRESS")
 	SERVER_PORT = os.Getenv("SERVER_PORT")
 	DB_USER = os.Getenv("DB_USER")
 	DB_PASSWORD = os.Getenv("DB_PASSWORD")

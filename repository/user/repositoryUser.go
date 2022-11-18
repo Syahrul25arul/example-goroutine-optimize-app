@@ -7,4 +7,5 @@ import (
 
 type RepositoryUser interface {
 	Save(user *domain.User) *errs.AppErr
+	FindByEmail(email string) (*domain.User, *errs.AppErr)
 }

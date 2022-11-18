@@ -6,5 +6,6 @@ import (
 )
 
 type UserService interface {
-	Save(user *domain.User) *helper.ResponseMessage
+	Register(userRequest *domain.UserRegisterRequest) *helper.ResponseMessage
+	VerifyEmail(UserVerifyEmailRequest *domain.UserVerifyEmailRequest) *helper.ResponseMessage
 }

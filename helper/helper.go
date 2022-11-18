@@ -3,6 +3,7 @@ package helper
 import (
 	"fmt"
 	"goroutine-optimize/errs"
+	"math/rand"
 	"reflect"
 	"strconv"
 
@@ -52,4 +53,14 @@ func IsValid(data interface{}) *errs.AppErr {
 func BcryptPassword(passwordSalt string) string {
 	newPassword, _ := bcrypt.GenerateFromPassword([]byte(passwordSalt), 8)
 	return string(newPassword)
+}
+
+func RandomString(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	s := make([]rune, n)
+	for i := range s {
+		s[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(s)
 }

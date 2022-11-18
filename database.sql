@@ -10,7 +10,7 @@ CREATE TABLE users (
     email varchar (50) not null,
     email_verify status default 'inactive',
     -- customer_id integer references customers(customer_id), -- relation from customres table
-    created_at timestamp without time zone default now(),
+    created_at integer not null,
     CONSTRAINT users_pkey PRIMARY KEY (id)
 );
 

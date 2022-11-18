@@ -20,8 +20,22 @@ func (r *repositoryUserImpl) Save(user *domain.User) *errs.AppErr {
 	// save user and check there is an error or not
 	if tx := r.db.Save(user); tx.Error != nil {
 		// if there error, create logger to record error
-		logger.Error("error save product : " + tx.Error.Error())
+		logger.Error("error save user : " + tx.Error.Error())
 		return errs.NewUnexpectedError("Sorry, an error has occurred on our system due to an internal server error. please try again!")
 	}
 	return nil
+}
+
+func (r *repositoryUserImpl) FindByEmail(email string) (*domain.User, *errs.AppErr) {
+	// set variable to get data user
+	var user *domain.User
+	// get user by email
+	if tx := r.db.First(&user, "email = ?", email); tx.RowsAffected == 0 {
+		logger.Error("error get data user by email not found")
+		return nil, errs.NewForbiddenError("you dont have credential")
+	} else if tx.Error != nil {
+		logger.Error("error get data user by email : " + tx.Error.Error())
+		return nil, errs.NewUnexpectedError("Sorry, an error has occurred on our system due to an internal server error. please try again!")
+	}
+	return user, nil
 }
