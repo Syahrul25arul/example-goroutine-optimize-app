@@ -39,3 +39,14 @@ func (r *repositoryTokenImpl) FindByEmail(email string) (*domain.Token, *errs.Ap
 	}
 	return token, nil
 }
+
+func (r *repositoryTokenImpl) Delete(token *domain.Token) *errs.AppErr {
+	if tx := r.db.Delete(token); tx.RowsAffected == 0 {
+		logger.Error("error delete token")
+		return errs.NewBadRequestError("error delete token")
+	} else if tx.Error != nil {
+		logger.Error("error delete token : " + tx.Error.Error())
+		return errs.NewUnexpectedError("error delete token, unexpected error")
+	}
+	return nil
+}

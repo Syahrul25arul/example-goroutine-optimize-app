@@ -21,25 +21,28 @@ func NewAuthHandler(service service_user.UserService) *authHandler {
 }
 
 func (h *authHandler) Register(ctx *gin.Context) {
-	// start time to record duration of execute process coding
+	// * start time to record duration of execute process coding
 	start := time.Now()
 
-	// create user variabel for data user
+	// * create user variabel for data user
 	var user *domain.UserRegisterRequest
 	err := ctx.ShouldBindJSON(&user)
 
-	// cek if any error when scan data user from client
+	// TODO : cek if any error when scan data user from client
 	if err != nil {
 		logger.Error("error scan data user")
-		errResponse := helper.NewResponseMessage(true, http.StatusUnprocessableEntity, map[string]string{"message": "error scan data user" + err.Error()})
+		errResponse := helper.NewResponseMessage(true, http.StatusUnprocessableEntity, map[string]string{
+			"message": "error scan data user" + err.Error(),
+			"start":   fmt.Sprintf("Duration execution %s", time.Since(start)),
+		})
 		ctx.JSON(errResponse.Code, errResponse)
 		return
 	}
 
-	// if not error, save data user and return response
+	// TODO : if not error, save data user and return response
 	resp := h.service.Register(user)
 	message := resp.Data.(map[string]string)
-	message["start"] = fmt.Sprintf("Duration executution %s", time.Since(start))
+	message["start"] = fmt.Sprintf("Duration execution %s", time.Since(start))
 	resp.Data = message
 
 	ctx.JSON(resp.Code, resp)
@@ -47,18 +50,18 @@ func (h *authHandler) Register(ctx *gin.Context) {
 }
 
 func (a *authHandler) VerifyEmail(ctx *gin.Context) {
-	// start time to record duration of execute process coding
+	// * start time to record duration of execute process coding
 	start := time.Now()
 
-	// create user variabel for data user email verify request
+	// TODO : create user variabel for data user email verify request
 	var user = &domain.UserVerifyEmailRequest{}
 	user.Email = ctx.Query("email")
 	user.Token = ctx.Query("token")
 
-	// Verify Email address and return response
+	// TODO : Verify Email address and return response
 	resp := a.service.VerifyEmail(user)
 	message := resp.Data.(map[string]string)
-	message["start"] = fmt.Sprintf("Duration executution %s", time.Since(start))
+	message["start"] = fmt.Sprintf("Duration execution %s", time.Since(start))
 	resp.Data = message
 
 	ctx.JSON(resp.Code, resp)

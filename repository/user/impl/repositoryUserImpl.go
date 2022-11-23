@@ -39,3 +39,17 @@ func (r *repositoryUserImpl) FindByEmail(email string) (*domain.User, *errs.AppE
 	}
 	return user, nil
 }
+
+func (r *repositoryUserImpl) FindUserAccount(username, email string) (*domain.User, *errs.AppErr) {
+	// * set variable to get data user
+	var user *domain.User
+	// TODO : get user by email
+	if tx := r.db.First(&user, "username = ? or email = ?", username, email); tx.RowsAffected == 0 {
+		logger.Error("error get data user account not found")
+		return nil, errs.NewNotFoundError("user not found")
+	} else if tx.Error != nil {
+		logger.Error("error get data user account : " + tx.Error.Error())
+		return nil, errs.NewUnexpectedError("Sorry, an error has occurred on our system due to an internal server error. please try again!")
+	}
+	return user, nil
+}

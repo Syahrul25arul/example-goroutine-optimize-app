@@ -21,7 +21,7 @@ ALTER TABLE users ADD CONSTRAINT password_check check (password != '');
 CREATE TABLE user_token (
     id serial not null,
     email varchar(50) not null,
-    token varchar(255) not null,
+    token varchar(255) not null unique,
     date_created integer,
     CONSTRAINT token_pkey PRIMARY KEY (id)
 );

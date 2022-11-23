@@ -1,11 +1,14 @@
 package helper
 
 import (
+	"context"
+	"encoding/base64"
 	"fmt"
 	"goroutine-optimize/errs"
 	"math/rand"
 	"reflect"
 	"strconv"
+	"sync"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -35,19 +38,52 @@ func IsValid(data interface{}) *errs.AppErr {
 				return errs.NewValidationError(fmt.Sprintf("field %s cannot less than %s", field.Name, strconv.Itoa(minLength)))
 			}
 		}
-
-		// lengthName := reflect.ValueOf(data).Field(i).Interface().(string) // .(string) di akhir digunakan untuk konversi tipe data pada tipe data interface kosong
-		// fmt.Println()
-
-		// lengthString, _ := strconv.Atoi(field.Tag.Get("max"))
-
-		// // if disini untuk memvalidasi apakah panjang lebih dari tag max
-		// if int(len(reflect.ValueOf(data).Field(i).Interface().(string))) > lengthString {
-		// 	return errs.NewValidationError(fmt.Sprintf("field %s cannot more than 10", field.Name))
-		// }
 	}
-
 	return nil
+}
+func IsValidV2(data interface{}, err chan *errs.AppErr, ctx context.Context) {
+	// * create wait group for waiting goroutine
+	var wg sync.WaitGroup
+	t := reflect.TypeOf(data)
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		wg.Add(1)
+
+		// TODO : Validasi request client
+		// ? validasi request client running on goroutine, so we must be waiting until goroutine done
+		go func(i int) {
+			defer wg.Done()
+
+			// * why we use select ?. because we listen signal cancel from context.
+			select {
+			// TODO : if context send signal cancel. we cancel all goroutine.
+			case <-ctx.Done():
+				return
+			default:
+				// * this block for validasi all field from request client.
+				if field.Tag.Get("required") != "" && field.Tag.Get("required") == "true" && reflect.ValueOf(data).Field(i).Interface() == "" {
+					err <- errs.NewValidationError(fmt.Sprintf("field %s cannot be empty", field.Name))
+					return
+				}
+
+				if field.Tag.Get("min") != "" {
+					minLength, _ := strconv.Atoi(field.Tag.Get("min"))
+					if int(len(reflect.ValueOf(data).Field(i).Interface().(string))) < minLength {
+						err <- errs.NewValidationError(fmt.Sprintf("field %s cannot less than %s", field.Name, strconv.Itoa(minLength)))
+						return
+					}
+				}
+				return
+			}
+		}(i)
+	}
+	wg.Wait()
+
+	// * if all field from request client done to validate, we send message End Of Line
+	// * that for tell to goroutine which listent to channel to close channel. because theres no data to send in channel.
+	err <- errs.NewUnexpectedError("End Of Line")
+
 }
 
 func BcryptPassword(passwordSalt string) string {
@@ -63,4 +99,8 @@ func RandomString(n int) string {
 		s[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(s)
+}
+
+func RandomStringV2() string {
+	return base64.StdEncoding.EncodeToString([]byte("this is token"))
 }
